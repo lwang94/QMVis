@@ -69,8 +69,14 @@ class InfSquareWell:
         
         """
         potential = np.piecewise(self.x,
-                                 [np.any([self.x<=-self.L/2, self.x>=self.L/2], axis = 0), np.all([self.x>-self.L/2, self.x<self.L/2], axis = 0)],
-                                 [ylim, 0])
+                                 
+                                 [np.any([self.x <= -self.L / 2, 
+                                          self.x >= self.L / 2], axis = 0), 
+                                  np.all([self.x > -self.L / 2, 
+                                          self.x < self.L / 2], axis = 0)],
+    
+                                 [ylim, 
+                                  0])
         return potential
 
     
@@ -105,9 +111,13 @@ class InfSquareWell:
         if len(wfunc) < 100:
             print ('WARNING: size of array may be too small to yield accurate results from finite difference approximation')  
             
-        kinetic = op.kinetic_op(self.x, wfunc, particle, h_bar = h_bar, finitediff_scheme = finitediff_scheme)
+        kinetic = op.kinetic_op(self.x, 
+                                wfunc, 
+                                particle, 
+                                h_bar = h_bar, 
+                                finitediff_scheme = finitediff_scheme)
 
-        potential = self.potential()*wfunc
+        potential = self.potential() * wfunc
 
         new_wfunc = kinetic + potential
         
@@ -151,12 +161,24 @@ class InfSquareWell:
                        
         if n%2 == 0:
             return np.piecewise(self.x, 
-                                [np.any([self.x<=-self.L/2, self.x>=self.L/2], axis = 0), np.all([self.x>-self.L/2, self.x<self.L/2], axis = 0)], 
-                                [0, lambda x: np.sqrt(2/self.L)*np.sin(n*np.pi*x/self.L)])
+                                
+                                [np.any([self.x <= -self.L / 2, 
+                                         self.x >= self.L / 2], axis = 0), 
+                                 np.all([self.x > -self.L / 2, 
+                                         self.x < self.L / 2], axis = 0)], 
+    
+                                [0, 
+                                 lambda x : np.sqrt(2 / self.L) * np.sin(n * np.pi * x / self.L)])
         else:
             return np.piecewise(self.x, 
-                                [np.any([self.x<=-self.L/2, self.x>=self.L/2], axis = 0), np.all([self.x>-self.L/2, self.x<self.L/2], axis = 0)], 
-                                [0, lambda x: np.sqrt(2/self.L)*np.cos(n*np.pi*x/self.L)])
+                                
+                                [np.any([self.x <= -self.L / 2, 
+                                         self.x >= self.L / 2], axis = 0), 
+                                 np.all([self.x > -self.L / 2, 
+                                         self.x < self.L / 2], axis = 0)],
+    
+                                [0, 
+                                 lambda x : np.sqrt(2 / self.L) * np.cos(n * np.pi * x / self.L)])
 
     
     def timedep_eigenfunc(self, t, n, particle, h_bar = 6.626e-34/(2*np.pi)):
@@ -206,16 +228,28 @@ class InfSquareWell:
                        
         if n%2 == 0:
             return np.piecewise(complex_x, 
-                                [np.any([self.x<=-self.L/2, self.x>=self.L/2], axis = 0), np.all([self.x>-self.L/2, self.x<self.L/2], axis = 0)], 
-                                [0, lambda x: np.sqrt(2/self.L)
-                                              *np.sin(n*np.pi*x/self.L)
-                                              *np.exp(-1j*self.eigenvalue(n, particle, h_bar = h_bar)*t/h_bar)])
+                                
+                                [np.any([self.x <= -self.L / 2, 
+                                         self.x >= self.L / 2], axis = 0), 
+                                 np.all([self.x > -self.L / 2, 
+                                         self.x < self.L / 2], axis = 0)],
+    
+                                [0, 
+                                 lambda x : np.sqrt(2 / self.L)
+                                          * np.sin(n * np.pi * x / self.L)
+                                          * np.exp(-1j * self.eigenvalue(n, particle, h_bar = h_bar) * t / h_bar)])
         else:
             return np.piecewise(complex_x, 
-                                [np.any([self.x<=-self.L/2, self.x>=self.L/2], axis = 0), np.all([self.x>-self.L/2, self.x<self.L/2], axis = 0)], 
-                                [0, lambda x: np.sqrt(2/self.L)
-                                              *np.cos(n*np.pi*x/self.L)
-                                              *np.exp(-1j*self.eigenvalue(n, particle, h_bar = h_bar)*t/h_bar)])        
+                                
+                                [np.any([self.x <= -self.L / 2, 
+                                         self.x >= self.L / 2], axis = 0), 
+                                 np.all([self.x > -self.L / 2, 
+                                         self.x < self.L / 2], axis = 0)],
+    
+                                [0, 
+                                 lambda x : np.sqrt(2 / self.L)
+                                          * np.cos(n * np.pi * x / self.L)
+                                          * np.exp(-1j * self.eigenvalue(n, particle, h_bar = h_bar) * t / h_bar)])        
         
             
     def eigenvalue(self, n, particle, h_bar = 6.626e-34/(2*np.pi)):
@@ -250,7 +284,7 @@ class InfSquareWell:
         4.934802200544679
         
         """
-        return (h_bar*np.pi*n)**2/(2*particle.m*self.L**2)
+        return (h_bar * np.pi * n) ** 2 / (2 * particle.m * self.L ** 2)
 
 class HarmonicOscillator:
     """
@@ -277,7 +311,7 @@ class HarmonicOscillator:
         """
         Generates the potential, V(x), for the Harmonic Oscillator.
         """
-        return (self.k*self.x**2)/2
+        return (self.k * self.x ** 2) / 2
             
         
     def hamiltonian(self, wfunc, particle, finitediff_scheme = 'central', h_bar = 6.626e-34/(2*np.pi)):
@@ -311,9 +345,13 @@ class HarmonicOscillator:
         if len(wfunc) < 100:
             print ('WARNING: size of array may be too small to yield accurate results from finite difference approximation') 
             
-        kinetic = op.kinetic_op(self.x, wfunc, particle, h_bar = h_bar, finitediff_scheme = finitediff_scheme)
+        kinetic = op.kinetic_op(self.x, 
+                                wfunc, 
+                                particle, 
+                                h_bar = h_bar, 
+                                finitediff_scheme = finitediff_scheme)
         
-        potential = self.potential()*wfunc
+        potential = self.potential() * wfunc
         
         return kinetic + potential
 
@@ -350,10 +388,15 @@ class HarmonicOscillator:
         if len(wfunc) < 100:
             print ('WARNING: size of array may be too small to yield accurate results from finite difference approximation')
             
-        w = np.sqrt(self.k/particle.m)
-        constant = 1/np.sqrt(2*h_bar*particle.m*w)
-        return constant*(-1j*op.momentum_op(self.x, wfunc, h_bar = h_bar, finitediff_scheme = finitediff_scheme)
-                         + particle.m*w*op.position_op(self.x, wfunc))
+        w = np.sqrt(self.k / particle.m)
+        constant = 1 / np.sqrt(2 * h_bar * particle.m * w)
+        
+        return constant*(particle.m * w * op.position_op(self.x, wfunc)
+                         - 1j * op.momentum_op(self.x, 
+                                               wfunc, 
+                                               h_bar = h_bar, 
+                                               finitediff_scheme = finitediff_scheme))
+        
         
     def ladderdown_op(self, wfunc, particle, h_bar = 6.626e-34/(2*np.pi), finitediff_scheme = 'central'):
         """
@@ -387,10 +430,14 @@ class HarmonicOscillator:
         if len(wfunc) < 100:
             print ('WARNING: size of array may be too small to yield accurate results from finite difference approximation')
             
-        w = np.sqrt(self.k/particle.m)
-        constant = 1/np.sqrt(2*h_bar*particle.m*w)
-        return constant*(1j*op.momentum_op(self.x, wfunc, h_bar = h_bar, finitediff_scheme = finitediff_scheme)
-                         + particle.m*w*op.position_op(self.x, wfunc))
+        w = np.sqrt(self.k / particle.m)
+        constant = 1 / np.sqrt(2 * h_bar * particle.m * w)
+        
+        return constant*(particle.m * w * op.position_op(self.x, wfunc)
+                         + 1j*op.momentum_op(self.x, 
+                                             wfunc, 
+                                             h_bar = h_bar, 
+                                             finitediff_scheme = finitediff_scheme))
         
         
     def eigenfunc(self, n, particle, h_bar = 6.626e-34/(2*np.pi)):
@@ -403,6 +450,10 @@ class HarmonicOscillator:
         ---------------------------------------------
         n : `int`
             The order of the eigenfunction.
+        particle : Particle class (see Particle.py for more details)
+            Particle whose mass will determine the angular frequency from the force constant
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.        
             
         Returns
         ---------------------------------------------
@@ -411,11 +462,14 @@ class HarmonicOscillator:
             
         Examples
         --------------------------------------------
-        Return the ground state eigenfunction for a Harmonic Oscillator with force constant k = 1.
+        Return the ground state eigenfunction for a Harmonic Oscillator with force constant k = 1. Units are natural units such 
+        that the electron rest mass and reduced Planck constant is 1.
         
+        >>> import Particle as p
         >>> x = np.linspace(-5, 5, 10)
         >>> ho = HarmonicOscillator(x, 1)
-        >>> ho.eigenfunc(0)
+        >>> electron = p.Particle(1)
+        >>> ho.eigenfunc(0, electron, h_bar = 1)
         array([2.79918439e-06, 3.90567063e-04, 1.58560022e-02, 1.87294814e-01,
                6.43712257e-01, 6.43712257e-01, 1.87294814e-01, 1.58560022e-02,
                3.90567063e-04, 2.79918439e-06])        
@@ -425,12 +479,15 @@ class HarmonicOscillator:
             raise Exception('for the harmonic oscillator, n must be a positive integer starting from 0')        
         n = int(n) #coverts n datatype to the native Python int type to ensure number of bits is enough for calculating the square root of large numbers
         
-        w = np.sqrt(self.k/particle.m)
-        alpha = particle.m*w/h_bar
-        y = np.sqrt(alpha)*self.x
-        Hermite = sp.eval_hermite(n, y)        
-        C = (1/np.sqrt(float(2**n)*np.math.factorial(n)))*(alpha/np.pi)**(np.pi/4)
-        return C*np.exp(-y**2/2)*Hermite
+        w = np.sqrt(self.k / particle.m)
+        alpha = particle.m * w / h_bar
+        
+        y = np.sqrt(alpha) * self.x
+        Hermite = sp.eval_hermite(n, y)    
+        
+        C = (1 / np.sqrt(float(2 ** n) * np.math.factorial(n))) * (alpha / np.pi) ** (np.pi / 4)
+        
+        return C * np.exp(-y ** 2 / 2) * Hermite
 
     
     def timedep_eigenfunc(self, t, n, particle, h_bar = 6.626e-34/(2*np.pi)):
@@ -474,12 +531,15 @@ class HarmonicOscillator:
             raise Exception('for the harmonic oscillator, n must be a positive integer starting from 0')
         n = int(n) #coverts n datatype to the native Python int type to ensure number of bits is enough for calculating the square root of large numbers
             
-        w = np.sqrt(self.k/particle.m)
-        alpha = particle.m*w/h_bar
-        y = np.sqrt(alpha)*self.x
-        Hermite = sp.eval_hermite(n, y)        
-        C = (1/np.sqrt(float(2**n)*np.math.factorial(n)))*(alpha/np.pi)**(np.pi/4)
-        return C*np.exp(-y**2/2)*Hermite*np.exp(-1j*self.eigenvalue(n, particle, h_bar = h_bar)*t/h_bar)     
+        w = np.sqrt(self.k / particle.m)
+        alpha = particle.m * w / h_bar
+        
+        y = np.sqrt(alpha) * self.x
+        Hermite = sp.eval_hermite(n, y)     
+        
+        C = (1 / np.sqrt(float(2 ** n) * np.math.factorial(n))) * (alpha / np.pi) ** (np.pi/4)
+        
+        return C * np.exp(-y ** 2 / 2) * Hermite * np.exp(-1j * self.eigenvalue(n, particle, h_bar = h_bar) * t / h_bar)     
         
     
     def eigenvalue(self, n, particle, h_bar = 6.626e-34/(2*np.pi)):
@@ -513,55 +573,172 @@ class HarmonicOscillator:
         0.5
         
         """
-        w = np.sqrt(self.k/particle.m)
-        return h_bar*w*(n + 1/2)
+        w = np.sqrt(self.k / particle.m)
+        
+        return h_bar * w * (n + 1/2)
 
 class FiniteSquareWell:
+    """
+    Simulates the finite square well potential.
+    
+    Parameters
+    -------------------
+    x : array-like 
+        The spatial coordinates used to define the potential, V(x)
+    L : `float`, `int` 
+        The length of the box
+    V0 : `float`, `int`
+        The 'depth' of the box
+        
+    Attributes
+    --------------------
+    Same as Parameters    
+    """
     
     def __init__(self, x, L, V0):
         self.x = x
         self.L = L
         self.V0 = V0
-        
+   
+     
     def potential(self):
+        """
+        Generates the potential, V(x), of the finite square well
+        """
         potential = np.piecewise(self.x,
-                                 [np.any([self.x<=-self.L/2, self.x>=self.L/2], axis = 0), np.all([self.x>-self.L/2, self.x<self.L/2], axis = 0)],
-                                 [0, -self.V0])
+                                 
+                                 [np.any([self.x <= -self.L / 2, 
+                                          self.x >= self.L / 2], axis = 0), 
+                                  np.all([self.x > -self.L / 2, 
+                                          self.x < self.L / 2], axis = 0)],
+    
+                                 [0, 
+                                  -self.V0])
+    
         return potential        
     
+    
     def hamiltonian(self, wfunc, particle, finitediff_scheme = 'central', h_bar = 6.626e-34/(2*np.pi)):
-        kinetic = op.kinetic_op(self.x, wfunc, particle, h_bar = h_bar, finitediff_scheme = finitediff_scheme)
+        """
+        Returns the result of the Finite Square Potential Hamiltonian operator acting on a wavefunction.
+        
+        Parameters
+        ---------------------------------------------------
+        wfunc : array-like
+            Wavefunction for the operator to act on. Should be the same size as x
+        particle : Particle class (see Particle.py for more details)
+            Particle whose mass will be used in the kinetic energy portion of the hamiltonian
+        finitediff_scheme : {'central', 'five point stencil'}, optional
+            Method of finite difference approximation for the second order derivative in the kinetic energy operator. Options are 
+            'central' for the central differences method or 'five point stencil' for the five point stencil method. 
+            Defaults to 'central'.
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.
+        
+        Returns
+        --------------------------------------
+        out : `ndarray`
+            The output is an array representing the result of the Finite Square Potential Hamiltonian acting on 
+            the input wavefunction.  
+            
+        Notes
+        ------------------------------------------
+        Since the function uses a finite difference method to approximate the second order derivative present in the kinetic energy
+        operator, a large array shoud be used to yield the most accurate results.  
+        """
+        kinetic = op.kinetic_op(self.x, 
+                                wfunc, 
+                                particle, 
+                                h_bar = h_bar, 
+                                finitediff_scheme = finitediff_scheme)
 
-        potential = self.potential()*wfunc
+        potential = self.potential() * wfunc
 
         new_wfunc = kinetic + potential
 
         return new_wfunc
 
+
     def eigenfunc(self, n, particle, h_bar = 6.626e-34/(2*np.pi)):
-        z0 = self.L*np.sqrt(2*particle.m*self.V0)/(2*h_bar)
-
-        z = opt.brentq(self.transcendental_root, n*np.pi/2, (n + 1)*np.pi/2, args = (z0, n))
-        if z == 0 or (z0**2 - z**2) < 0:
-            raise Exception('Dimensions of the well do not permit bound states with this value of n. Please reconsider your parameters')
-            
-        l = 2*z/self.L
-        k = 2*np.sqrt(z0**2 - z**2)/self.L
-
+        """
+        Returns the normalized eigenfunction for the Finite Square Potential. Does not include time dependance.
+        This is equivalent to the eigenfunction at time t = 0. For the eigenfunction with the time dependance included, 
+        see timedep_eigenfunc().
         
-        if n%2 == 0:
-            const_factor = np.cos(z)/np.exp(-np.sqrt(z0**2 - z**2))
-            eigenfunction = np.piecewise(self.x, 
-                                         [self.x <= -self.L/2, np.all([self.x > -self.L/2, self.x < self.L/2], axis = 0), self.x >= self.L/2],
-                                         [lambda x: const_factor*np.exp(k*x), lambda x: np.cos(l*x), lambda x: const_factor*np.exp(-k*x)])           
-            eigenfunction = op.normalize(self.x, eigenfunction)
+        Parameters
+        ---------------------------------------------
+        n : `int`
+            The order of the eigenfunction.
+        particle : Particle class (see Particle.py for more details)
+            Particle whose mass will determine the Energy levels of the potential
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.        
             
+        Returns
+        ---------------------------------------------
+        out : `ndarray`
+            The output is an array representing the nth normalized eigenfunction for the Finite Square Potential.   
+            
+        Examples
+        --------------------------------------------
+        Return the ground state eigenfunction for a Finite Square Well with length, L = 1 and depth, V0 = 10. Units are natural units 
+        that the electron rest mass and reduced Planck constant is 1.
+        
+        >>> import Particle as p
+        >>> x = np.linspace(-1, 1, 10)
+        >>> fsw = FiniteSquareWell(x, 1, 10)
+        >>> electron = p.Particle(1)
+        >>> fsw.eigenfunc(0, electron, h_bar = 1)
+        array([0.07759989 0.18565918 0.44419303 0.87140321 1.12065552 1.12065552
+               0.87140321 0.44419303 0.18565918 0.07759989])
+        """
+        #Finding roots of the transcendental equation: tan(z) = np.sqrt((z/z0) ** 2 - 1) for even functions or -cot(z) = np.sqrt((z/z0) ** 2 -1) for odd functions
+        z0 = self.L * np.sqrt(2 * particle.m * self.V0) / (2 * h_bar)
+        
+        z = opt.brentq(self.transcendental_root, #uses brentq method of root finding
+                       n * np.pi / 2,            #in the given region
+                       (n + 1) * np.pi / 2, 
+                       args = (z0, n)) 
+        
+        #catch any errors from root finding
+        if z == 0 or (z0 ** 2 - z ** 2) < 0:
+            raise Exception('Dimensions of the well do not permit bound states with this value of n. Please reconsider your parameters')
+        
+        #finds "Energy" constants from root, z
+        l = 2 * z / self.L
+        k = 2 * np.sqrt(z0 ** 2 - z ** 2) / self.L
+
+        #construct bound state eigenfunctions
+        #Even functions
+        if n%2 == 0:
+            const_factor = np.cos(z) / np.exp(-np.sqrt(z0 ** 2 - z ** 2)) #finds constant such that piecewise function is continuous at boundaries
+            eigenfunction = np.piecewise(self.x,
+                                         
+                                         [self.x <= -self.L / 2, 
+                                          np.all([self.x > -self.L / 2, 
+                                                  self.x < self.L / 2], axis = 0), 
+                                          self.x >= self.L / 2],
+                                                  
+                                         [lambda x : const_factor * np.exp(k * x), 
+                                          lambda x : np.cos(l * x), 
+                                          lambda x : const_factor * np.exp(-k * x)])
+                                          
+            eigenfunction = op.normalize(self.x, eigenfunction) #normalize eigenfunction
+        #Odd functions    
         else:
-            const_factor = np.sin(z)/np.exp(-np.sqrt(z0**2 - z**2))
-            eigenfunction = np.piecewise(self.x, 
-                                         [self.x <= -self.L/2, np.all([self.x > -self.L/2, self.x < self.L/2], axis = 0), self.x >= self.L/2],
-                                         [lambda x: -const_factor*np.exp(k*x), lambda x: np.sin(l*x), lambda x: const_factor*np.exp(-k*x)])                    
-            eigenfunction = op.normalize(self.x, eigenfunction)
+            const_factor = np.sin(z) / np.exp(-np.sqrt(z0 ** 2 - z ** 2)) #finds constant such that piecewise function is continuous at boundaries
+            eigenfunction = np.piecewise(self.x,
+                                         
+                                         [self.x <= -self.L / 2, 
+                                          np.all([self.x > -self.L / 2, 
+                                                  self.x < self.L / 2], axis = 0), 
+                                          self.x >= self.L / 2],
+                                                  
+                                         [lambda x : -const_factor * np.exp(k * x), 
+                                          lambda x : np.sin(l * x), 
+                                          lambda x: const_factor * np.exp(-k * x)])
+                                          
+            eigenfunction = op.normalize(self.x, eigenfunction) #normalize eigenfunctions
             
         return eigenfunction
 

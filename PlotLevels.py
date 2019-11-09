@@ -4,7 +4,7 @@ Created on Wed Oct  2 13:55:49 2019
 
 @author: lawre
 """
-import flatten
+from flatten import flatten
 
 import matplotlib.animation as animation
 
@@ -138,7 +138,7 @@ class PlotLevels:
                                   transform = self.axes[i].transAxes, fontsize = level_label[1])
                                                      
     
-    def plot_multipleanimated(self, animation_dict, blitting = True):
+    def plot_multipleanimated(self, animation_dict, interval = 200, blitting = True):
         """
         Plots animated line graph on multiple axes. 
         
@@ -169,9 +169,11 @@ class PlotLevels:
             |              |           |for more details.                                                                 |
             +--------------+-----------+----------------------------------------------------------------------------------+   
             |arguments     |`tuple`    |Tuple containing the arguments for the above func obejct. Does not include the    |
-            |              |           |frame parameter (typically i)                                                     |
+            |              |           |frame and plot_elements parameter (typically i and plot_elements)                 |
             +--------------+-----------+----------------------------------------------------------------------------------+
             
+        interval : `int`, optional
+            The interval in milliseconds between each frame of the animation. Defaults to 200
         blitting : `bool`, optional
             Boolean determining whether the animation function will use blitting. Set to False when creating animations on both 
             the background and foreground axes. Defaults to True.
@@ -215,9 +217,18 @@ class PlotLevels:
         
         #separate cases for blitting
         if blitting == True:
-            ani = animation.FuncAnimation(self.fig, self.animate, init_func = init, fargs = [plot_elements, animation_dict], blit = True)
+            ani = animation.FuncAnimation(self.fig, 
+                                          self.animate, 
+                                          init_func = init, 
+                                          fargs = [plot_elements, animation_dict], 
+                                          interval = interval,
+                                          blit = True)
         else:
-            ani = animation.FuncAnimation(self.fig, self.animate, fargs = [plot_elements, animation_dict], blit = False)
+            ani = animation.FuncAnimation(self.fig, 
+                                          self.animate, 
+                                          fargs = [plot_elements, animation_dict], 
+                                          interval = interval,
+                                          blit = False)
         
         return ani
     
@@ -283,7 +294,7 @@ class PlotLevels:
             See https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.animation.FuncAnimation.html for more details.
         arguments : list of tuples
             List of tuples which contain the arguments to be passed into the above callable functions. This does not include the frame
-            parameter (typically i)
+            and plot_elements parameter (typically i and plot_elements)
         
         Returns
         -------------------------------------------------------

@@ -4,7 +4,7 @@ Created on Sun Sep 29 23:08:29 2019
 
 @author: lawre
 """
-import flatten
+from flatten import flatten
 import Operators as op
 
 import numpy as np
