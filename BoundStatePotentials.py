@@ -485,7 +485,7 @@ class HarmonicOscillator:
         y = np.sqrt(alpha) * self.x
         Hermite = sp.eval_hermite(n, y)    
         
-        C = (1 / np.sqrt(float(2 ** n) * np.math.factorial(n))) * (alpha / np.pi) ** (np.pi / 4)
+        C = (1 / np.sqrt(float(2 ** n) * np.math.factorial(n))) * (alpha / np.pi) ** (1 / 4)
         
         return C * np.exp(-y ** 2 / 2) * Hermite
 
@@ -537,7 +537,7 @@ class HarmonicOscillator:
         y = np.sqrt(alpha) * self.x
         Hermite = sp.eval_hermite(n, y)     
         
-        C = (1 / np.sqrt(float(2 ** n) * np.math.factorial(n))) * (alpha / np.pi) ** (np.pi/4)
+        C = (1 / np.sqrt(float(2 ** n) * np.math.factorial(n))) * (alpha / np.pi) ** (1 / 4)
         
         return C * np.exp(-y ** 2 / 2) * Hermite * np.exp(-1j * self.eigenvalue(n, particle, h_bar = h_bar) * t / h_bar)     
         
