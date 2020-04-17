@@ -568,10 +568,10 @@ class HarmonicOscillator:
         >>> import Particle as p 
         >>> x = np.linspace(-2, 2, 1000)
         >>> electron = p.Particle(1)
-        >>> ho = bsp.HarmonicOscillator(x, 1)
+        >>> ho = HarmonicOscillator(x, 1)
         >>> ho.eigenvalue(0, electron, h_bar = 1)   
         0.5
-        
+    
         """
         w = np.sqrt(self.k / particle.m)
         
@@ -744,63 +744,198 @@ class FiniteSquareWell:
 
 
     def timedep_eigenfunc(self, t, n, particle, h_bar = 6.626e-34/(2*np.pi)):
-        z0 = self.L*np.sqrt(2*particle.m*self.V0)/(2*h_bar)
+        """
+        Returns the normalized eigenfunction for the Finite Square Well with time dependance included. 
         
-        z = opt.brentq(self.transcendental_root, n*np.pi/2, (n + 1)*np.pi/2, args = (z0, n))
-        if z == 0:
-            raise Exception('Dimensions of the well do not permit this value of n. Please reconsider your parameters')
+        Parameters
+        -------------------------------------------------------
+        t : number
+            The time at which the eigenfunction is to be evaluated.
+        n : `int`
+            The order of the eigenfunction.
+        particle : Particle class (see Particle.py for more details)
+            Particle whose mass will determine the energy and therefore the time dependance of the eigenfunction.
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.
+        
+        Returns
+        ------------------------------------------------------
+        out : `complex ndarray`
+            The output is a complex array representing the nth normalized eigenfunction at time t for the
+            Finite Square Well
             
-        l = 2*z/self.L
-        k = 2*np.sqrt(z0**2 - z**2)/self.L
+        Examples
+        ------------------------------------------------------
+        Return the ground state for a Finite Square Well with length, L = 1 and depth, V0 = 10, at time t = 3. 
+        Units are natural units such that the electron rest mass and the reduced planck constant is 1. 
 
-        timefactor = np.exp(-1j*self.eigenvalue(n, particle, h_bar = h_bar)*t/h_bar) 
-        if n%2 == 0:
-            const_factor = np.cos(z)/np.exp(-np.sqrt(z0**2 - z**2))
-            eigenfunction = np.piecewise(self.x, 
-                                         [self.x <= -self.L/2, np.all([self.x > -self.L/2, self.x < self.L/2], axis = 0), self.x >= self.L/2],
-                                         [lambda x: const_factor*np.exp(k*x), lambda x: np.cos(l*x), lambda x: const_factor*np.exp(-k*x)])           
-            
-        else:
-            const_factor = np.sin(z)/np.exp(-np.sqrt(z0**2 - z**2))
-            eigenfunction = np.piecewise(self.x, 
-                                         [self.x <= -self.L/2, np.all([self.x > -self.L/2, self.x < self.L/2], axis = 0), self.x >= self.L/2],
-                                         [lambda x: -const_factor*np.exp(k*x), lambda x: np.sin(l*x), lambda x: const_factor*np.exp(-k*x)])                    
+        >>> import Particle as p
+        >>> x = np.linspace(-1, 1, 10)
+        >>> electron = p.Particle(1)
+        >>> fsw = FiniteSquareWell(x, 1, 10)
+        >>> fsw.timedep_eigenfunc(3, 0, electron, h_bar = 1)
+        array([-0.07039142+0.03266177j -0.16841278+0.07814389j -0.40293069+0.18696071j
+               -0.79045612+0.36677335j -1.01655467+0.47168357j -1.01655467+0.47168357j
+               -0.79045612+0.36677335j -0.40293069+0.18696071j -0.16841278+0.07814389j
+               -0.07039142+0.03266177j])
+        """
+        complex_x = np.array(self.x) + 0j #ensure complex array
         
-        eigenfunction = op.normalize(self.x, eigenfunction)*timefactor
+        #Finding roots of the transcendental equation: tan(z) = np.sqrt((z/z0) ** 2 - 1) for even functions or -cot(z) = np.sqrt((z/z0) ** 2 -1) for odd functions
+        z0 = self.L * np.sqrt(2 * particle.m * self.V0) / (2 * h_bar)
+
+        z = opt.brentq(self.transcendental_root, #uses brentq method of root finding 
+                       n * np.pi / 2,            #in the given region
+                       (n + 1) * np.pi / 2, 
+                       args = (z0, n))
+       
+        #catch any errors from root finding        
+        if z == 0 or (z0 ** 2 - z ** 2) < 0:
+            raise Exception('Dimensions of the well do not permit this value of n. Please reconsider your parameters')
+ 
+        #finds "Energy" constants from root, z
+        l = 2 * z / self.L
+        k = 2 * np.sqrt(z0 ** 2 - z ** 2) / self.L
+
+        #constructs bound state eigenfunctions with time dependance
+        timefactor = np.exp(-1j * self.eigenvalue(n, particle, h_bar = h_bar) * t / h_bar) #time dependance factor
+        #even functions
+        if n%2 == 0:
+            const_factor = np.cos(z) / np.exp(-np.sqrt(z0 ** 2 - z ** 2)) #finds constant such that piecewise function is continuous
+            eigenfunction = np.piecewise(complex_x,
+                                         
+                                         [self.x <= -self.L / 2, 
+                                          np.all([self.x > -self.L / 2, 
+                                                  self.x < self.L / 2], axis = 0), 
+                                          self.x >= self.L / 2],
+                                                  
+                                         [lambda x : const_factor * np.exp(k * x), 
+                                          lambda x : np.cos(l * x), 
+                                          lambda x : const_factor * np.exp(-k * x)])           
+        #odd functions 
+        else:
+            const_factor = np.sin(z) / np.exp(-np.sqrt(z0 ** 2 - z ** 2)) #finds constant such that piecewise function is continuous
+            eigenfunction = np.piecewise(complex_x, 
+                                         
+                                         [self.x <= -self.L / 2, 
+                                          np.all([self.x > -self.L / 2, 
+                                                  self.x < self.L / 2], axis = 0), 
+                                          self.x >= self.L / 2],
+                                                  
+                                         [lambda x : -const_factor * np.exp(k * x), 
+                                          lambda x : np.sin(l * x), 
+                                          lambda x : const_factor * np.exp(-k * x)])                    
+        
+        eigenfunction = op.normalize(self.x, eigenfunction)*timefactor #normalize eigenfunction and multiply it by time dependance
+        
+        return eigenfunction
         
         
     def eigenvalue(self, n, particle, h_bar = 6.626e-34/(2*np.pi)):
-        z0 = self.L*np.sqrt(2*particle.m*self.V0/(2*h_bar))
+        """
+        Returns the eigenvalue or energy of the Finite Square Well. 
         
-        z = opt.brentq(self.transcendental_root, n*np.pi/2, (n + 1)*np.pi/2, args = (z0, n))
-        if z == 0:
+        Parameters
+        ----------------------------------------------
+        n : `int`
+            The order of the eigenvalue.
+        particle : Particle class (see Particle.py for more details)
+            The particle whose mass determines the energy of the nth eigenstate.
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.
+        
+        Returns
+        ----------------------------------------------
+        out : `float`
+            The output is the eigenvalue or the energy of the nth eigenstate for a particle trapped in the Harmonic Oscillator.
+            
+        Examples
+        ------------------------------------------------
+        Return the ground state energy of an electron trapped in a Finite Square Well with length, L = 1 and depth V0 = 10. 
+        Units are natural units such that the electron rest mass and reduced planck constant is 1.
+        
+        >>> import Particle as p 
+        >>> x = np.linspace(-1, 1, 1000)
+        >>> electron = p.Particle(1)
+        >>> fsw = FiniteSquareWell(x, 1, 10)
+        >>> fsw.eigenvalue(0, electron, h_bar = 1)   
+        -7.185570550459651
+    
+        """
+        #Finding roots of the transcendental equation: tan(z) = np.sqrt((z/z0) ** 2 - 1) for even functions or -cot(z) = np.sqrt((z/z0) ** 2 -1) for odd functions
+        z0 = self.L * np.sqrt(2 * particle.m * self.V0 / (2 * h_bar))
+        
+        z = opt.brentq(self.transcendental_root,            #uses brentq method of root finding
+                       n * np.pi / 2, (n + 1) * np.pi / 2,  #in the given region
+                       args = (z0, n))
+        
+        #catch any errors from root finding
+        if z == 0 or (z0 ** 2 - z ** 2) < 0:
             raise Exception('Dimensions of the well do not permit this value of n. Please reconsider your parameters')
-        l = 2*z/self.L
-        E = (l*h_bar)**2/(2*particle.m) - self.V0
+            
+        #Find energy from root, z
+        l = 2 * z / self.L
+        E = (l * h_bar) ** 2 / (2 * particle.m) - self.V0
         
         return E
         
         
     def transcendental_root(self, z, z0, n):
+        """
+        Returns transcendental equations to find energies for the Finite Square Well potential. For even n, equations are of the form
+        tan(z) - sqrt((z / z0) ** 2 - 1) = 0 and for odd n, equations are of the form -cot(z) - sqrt((z / z0) ** 2 - 1) = 0.
+        Used in the eigenfunc, timedep_eigenfunc, and eigenvalue methods.
+        
+        Parameters
+        ---------------------------------------------------
+        z : ndarray
+            Array containing z-values that can be used to find eigenvalues for the Finite Square Well potential
+        z0 : number
+            Constant that is defined by length and depth of the Finite Square Well. Determines root of equation and therefore the 
+            eigenvalue.
+        n : `int`
+            Order of the eigenvalue
+        
+        Returns
+        -----------------------------------------------------
+        out : ndarray
+            Returns array representing transcendental equations that can be used to find the energy of the Finite Square Well
+        """
         if n%2 == 0:
-            result = np.tan(z) - np.sqrt((z0/z)**2 - 1)
+            result = np.tan(z) - np.sqrt((z0 / z) ** 2 - 1)
         else:
-            result = -1/np.tan(z) - np.sqrt((z0/z)**2 - 1)
+            result = -1 / np.tan(z) - np.sqrt((z0 / z) ** 2 - 1)
         
         return result
 
     def plot_transcendental(self, n, particle, h_bar = 6.626e-34/(2*np.pi), y_lim = 30):
-        z0 = self.L*np.sqrt(2*particle.m*self.V0/(2*h_bar))   
-        z = np.linspace(0, (n+1)*np.pi/2, 1000)
+        """
+        Plots transcendental equation that can be used to find energies for the Finite Square Well potential. The points 
+        at which the curves meet are the points at which the energy can be evaluated.
+        
+        Parameters
+        -------------------------------------------------------------
+        n : `int`
+            Order of the largest eigenfunction
+        particle : Particle class (see Particle.py for more details)
+            The particle whose mass determines the energy of the nth eigenstate.
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.
+        ylim : number, optional
+            The maximum y-value on the y-axis. Defaults to 30.
+        """
+        z0 = self.L * np.sqrt(2 * particle.m * self.V0 / (2 * h_bar))   
+        
+        z = np.linspace(0, (n + 1) * np.pi / 2, 1000)
         dz = z[1] - z[0]
         
         even = np.tan(z)
-        even[z % (np.pi/2) < dz*3] = np.nan
+        even[z % (np.pi / 2) < dz * 3] = np.nan #prevents matplotlib from plotting "jumps" and makes the graph look nicer
 
         odd = -1/np.tan(z)
-        odd[z % (np.pi/2) < dz*3] = np.nan        
+        odd[z % (np.pi / 2) < dz * 3] = np.nan #prevents matplotlib from plotting "jumps" and makes the graph look nicer  
         
-        plt.plot(z, np.sqrt((z0/z)**2 - 1))
+        plt.plot(z, np.sqrt((z0 / z) ** 2 - 1))
         plt.plot(z, even, 'r')
         plt.plot(z, odd, 'r')
         plt.ylim(0, y_lim)

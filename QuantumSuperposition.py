@@ -48,7 +48,7 @@ class QuantumSuperposition:
     
         
         if coeff == 'uniform distribution':
-            self.coeff = [1/np.sqrt(len(n))]*len(n) #sets the coefficients such that they are all equal and the superposition remains normalized (returns list type)
+            self.coeff = [1 / np.sqrt(len(n))] * len(n) #sets the coefficients such that they are all equal and the superposition remains normalized (returns list type)
         else: 
             self.coeff = coeff
 
@@ -99,7 +99,7 @@ class QuantumSuperposition:
         """
         series = np.zeros(len(self.x), dtype = np.complex128)
         for i in range(len(self.n)):
-            series += self.coeff[i]*self.potential.eigenfunc(self.n[i], *args, **kwargs)
+            series += self.coeff[i] * self.potential.eigenfunc(self.n[i], *args, **kwargs)
             
         return series
 
@@ -168,9 +168,12 @@ class QuantumSuperposition:
         else:
             args = tuple(args_list)
             
+        print (*args)
+            
         time_series = np.zeros(len(self.x), dtype = np.complex128)
         for i in range(len(self.n)):
-            time_series += self.coeff[i]*self.potential.eigenfunc(self.n[i], *args, **kwargs)*np.exp(-1j*self.potential.eigenvalue(self.n[i], particle, h_bar = h_bar)*t/h_bar)
+            time_series += (self.coeff[i] * self.potential.eigenfunc(self.n[i], *args, **kwargs)
+                            * np.exp(-1j * self.potential.eigenvalue(self.n[i], particle, h_bar = h_bar) * t / h_bar))
         
         return time_series   
 
@@ -198,7 +201,7 @@ class QuantumSuperposition:
             
         coeff = []
         for i in self.n:
-            coeff += [integrate.trapz(np.conj(wfunc)*self.potential.eigenfunc(i, *args, **kwargs), x = self.x)] #finds the integral of the conjugate of the wavefunction multipled by the ith eigenfunction and puts it in a list.
+            coeff += [integrate.trapz(np.conj(wfunc) * self.potential.eigenfunc(i, *args, **kwargs), x = self.x)] #finds the integral of the conjugate of the wavefunction multipled by the ith eigenfunction and puts it in a list.
                                                                                                #in bra-ket notation, this is c_i = <wfunc|eigenstate_i>
         
         self.coeff = coeff
@@ -206,7 +209,7 @@ class QuantumSuperposition:
      
     def timedependance_animation(self, fig, ax, particle,
                                 plot_elements = {'animatedline': True, 'tracker': True, 'staticline': None}, 
-                                ylim = [0, 5], frames = 200, speed = 50, h_bar = 6.626e-34/(2*np.pi), 
+                                ylim = [0, 5], frames = 200, interval = 200, speed = 50, h_bar = 6.626e-34/(2*np.pi), 
                                 args_list = [], kwargs = {}):
         """
         Creates an animated plot showing how the probability density of the superposition changes with time.
@@ -236,6 +239,8 @@ class QuantumSuperposition:
             second element is the upper bound. Defaults to [0, 5].
         frames : `int`, optional
             The number of frames to be used in the animation. Defaults to 200. 
+        interval : number, optional
+            The time in milliseconds between each frame of the animation. Defaults to 200.
         speed : number, optional
             The time interval at which the animation updates. eg. For speed = 50, the animation will show the superposition at times,
             t = 0, 50, 100, 150... Defaults to 50.
@@ -273,7 +278,11 @@ class QuantumSuperposition:
         
         #Determine whether the user would like to track the time
         if plot_elements.get('tracker') == True:
-            plot_elements['tracker'] = ax.text(0.05, 0.9, '', transform = ax.transAxes, fontsize = 'x-large') #the tracker element will be displayed in the upper left corner
+            plot_elements['tracker'] = ax.text(0.05, #the tracker element will be displayed in the upper left corner
+                                               0.9, 
+                                               '', 
+                                               transform = ax.transAxes, 
+                                               fontsize = 'x-large') 
         else:
             plot_elements.pop('tracker', None)
         
@@ -281,7 +290,7 @@ class QuantumSuperposition:
         if np.all(plot_elements.get('staticline') == None) == False:
             if len(plot_elements['staticline'].shape) == 1: #if the user only want to include a single set of static data
                 plot_elements['staticline'], = ax.plot(self.x, plot_elements['staticline'])
-            else: #if the user wants more than one set of static data
+            else:   #if the user wants more than one set of static data
                 plot_elements['staticline'] = plot_elements['staticline'].tolist()
                 for i in range(len(plot_elements['staticline'])):
                     plot_elements['staticline'][i], = ax.plot(self.x, plot_elements['staticline'][i]) 
@@ -306,6 +315,7 @@ class QuantumSuperposition:
                                       init_func= init, 
                                       frames = frames, 
                                       fargs = [plot_elements, ylim, particle, speed, h_bar, args_list, kwargs], 
+                                      interval = interval,
                                       blit = True)                         
         return ani
     
@@ -357,7 +367,11 @@ class QuantumSuperposition:
         """
         #sets the data for the animated plot
         if plot_elements.get('animatedline') != False and plot_elements.get('animatedline') != None:
-            time_series = self.superposition_timedep(i*speed, particle, h_bar = h_bar, args_list = args_list, kwargs = kwargs) #finds the superposition at time, t = i*speed
+            time_series = self.superposition_timedep(i*speed, #finds the superposition at time, t = i*speed
+                                                     particle, 
+                                                     h_bar = h_bar, 
+                                                     args_list = args_list, 
+                                                     kwargs = kwargs)
             prob_density = op.probdensity(time_series) #find the probability density of the resulting superposition
             
             plot_elements['animatedline'].set_data(self.x, prob_density) #sets data of Line2D object to be probability density of wavefunction
@@ -380,7 +394,7 @@ class QuantumSuperposition:
  
     def basisdependance_animation(self, fig, ax, particle, wfunc, 
                                   plot_elements = {'animatedline': True, 'tracker': True, 'staticline': None}, 
-                                  nbasis = None, t = 0, ylim = [0, 5], h_bar = 6.626e-34/(2*np.pi), interval = 200, 
+                                  nbasis = None, t = 0, ylim = [0, 5], interval = 200, h_bar = 6.626e-34/(2*np.pi), 
                                   args_list = [], kwargs = {}):
         """
         Given a wavefunction, creates an animated plot showing how the probability density of the superposition approximates the 
@@ -416,10 +430,10 @@ class QuantumSuperposition:
         ylim : `list` (must have two elements), optional
             List that determines the lower and upper bounds of the plot. The first element in the list is the lower bound and the 
             second element is the upper bound. Defaults to [0, 5].
-        h_bar : number, optional
-            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.
         interval : number, optional
             The time in milliseconds between each frame of the animation. Defaults to 200.
+        h_bar : number, optional
+            The reduced planck constant. Defaults to 6.626e-34/2pi. For natural units, set to 1.
         args_list : list
             List of extra arguments (other than the order, n, of the eigenfunction) to be passed into the eigenfunc method
             of the potential used to initialize the instance of the class. Defaults to []
@@ -456,7 +470,11 @@ class QuantumSuperposition:
         
         #Determine whether the user would like to track the time
         if plot_elements.get('tracker') == True:
-            plot_elements['tracker'] = ax.text(0.05, 0.9, '', transform = ax.transAxes, fontsize = 'x-large') #the tracker element will be displayed in the upper left corner
+            plot_elements['tracker'] = ax.text(0.05, #the tracker element will be displayed in the upper left corner
+                                               0.9, 
+                                               '', 
+                                               transform = ax.transAxes, 
+                                               fontsize = 'x-large') 
         else:
             plot_elements.pop('tracker', None)
         
@@ -550,7 +568,11 @@ class QuantumSuperposition:
             basis = QuantumSuperposition(self.potential, self.n[:int(i + 1)]) #create new superposition with specified number of basis functions
             basis.find_coeff(wfunc, *args, **kwargs) #finds coefficients to approximate wavefunction
             
-            prob_density = op.probdensity(basis.superposition_timedep(t, particle, h_bar = h_bar, args_list = args_list, kwargs = kwargs)) #finds probability density of resulting superposition
+            prob_density = op.probdensity(basis.superposition_timedep(t, #finds probability density of resulting superposition
+                                                                      particle, 
+                                                                      h_bar = h_bar, 
+                                                                      args_list = args_list, 
+                                                                      kwargs = kwargs)) 
             
             plot_elements['animatedline'].set_data(self.x, prob_density) #sets data of Line2D object to be probability density of wavefunction
             plot_elements['animatedline'].axes.axis([self.x[0], self.x[-1], ylim[0], ylim[1]])            

@@ -45,11 +45,17 @@ class PlotLevels:
         if coordinates == []:        
             self.axes = [self.fig.add_axes([0.1, 0.05, 0.8, 0.85])]
             for i in range(nlevels):
-                self.axes += [self.fig.add_axes([0.1, 0.1 + i*0.8/nlevels, 0.8, 0.8/nlevels], sharex = self.axes[0])] #uniform spacing
+                self.axes += [self.fig.add_axes([0.1, 
+                                                 0.1 + i * 0.8 / nlevels, 
+                                                 0.8, 
+                                                 0.8 / nlevels], 
+                                                sharex = self.axes[0])] #uniform spacing   
                 self.axes[-1].patch.set_alpha(0)
+                
         #When the user want to use custom coordinates but the number of coordinates don't match the number of axes needed
         elif len(coordinates) != nlevels + 1:
             raise Exception(f'Number of sets of coordinates ({len(coordinates)}) must match number of levels + 1 ({nlevels + 1})')
+            
         #When the user wants to use custom coordinates and inputs it correctly
         else:
             self.axes = [self.fig.add_axes(coordinates[0])]
@@ -119,7 +125,7 @@ class PlotLevels:
         lines = {}
         for i in y_data:
             line, = self.axes[i].plot(x, y_data[i])
-            lines = {**lines, i : line}
+            lines = {**lines, i : line} #put plots in dictionary for customization later
         
         #Customize the plot based on keyword arguments
         if kwargs.get('data_color') != None:
@@ -134,8 +140,11 @@ class PlotLevels:
         if kwargs.get('levels_label') != None:
             for i in kwargs['levels_label']:
                 level_label = kwargs['levels_label'][i]
-                self.axes[i].text(level_label[2], level_label[3], level_label[0], 
-                                  transform = self.axes[i].transAxes, fontsize = level_label[1])
+                self.axes[i].text(level_label[2], # x-coordinate
+                                  level_label[3], # y-coordinate
+                                  level_label[0], # string
+                                  transform = self.axes[i].transAxes, 
+                                  fontsize = level_label[1]) # font-size
                                                      
     
     def plot_multipleanimated(self, animation_dict, interval = 200, blitting = True):
